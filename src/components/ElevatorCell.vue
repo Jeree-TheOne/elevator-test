@@ -1,27 +1,58 @@
 <template>
   <div class="shaft">
-    <div class="cell" ref="cell"></div>
+    <div class="cell" ref="cell">
+      <div class="indicator" v-if="!isOpen">
+        <div :style="[direction ? '' : 'transform: rotate(180deg)']">▲</div>
+        <div>{{ floorToGo }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { nextTick } from "@vue/runtime-core";
 export default {
   data() {
     return {
       currentFloor: 1,
       isOpen: true,
+      floorToGo: 1,
+      direction: true,
     };
   },
 
-  // mounted() {
-  //   this.moveToFloor(5);
-  // },
+  props: {
+    startingFloor: {
+      type: Number,
+      default: 1,
+    },
+    finalFloor: {
+      type: Number,
+      default: 0,
+    },
+  },
+
+  mounted() {
+    nextTick(() => {
+      this.currentFloor = this.startingFloor;
+      this.floorToGo = this.finalFloor;
+
+      this.$refs.cell.style.transform = `translateY(${
+        (this.currentFloor - 1) * -100 + "%"
+      })`;
+      if (this.floorToGo > 0) this.moveToFloor(this.floorToGo);
+    });
+  },
 
   methods: {
     moveToFloor(floor) {
       if (this.currentFloor == floor) return;
+      this.currentFloor < floor
+        ? (this.direction = true)
+        : (this.direction = false);
+      this.floorToGo = floor;
       this.isOpen = false;
-      let duration = Math.abs(floor - this.currentFloor) * 1000;
+      let duration = Math.abs(floor - this.currentFloor) * 1000 + 1;
       let finalPossition = `translateY(${(floor - 1) * -100 + "%"})`;
       this.$refs.cell.animate(
         [
@@ -56,6 +87,7 @@ export default {
         );
         setTimeout(() => {
           this.isOpen = true;
+          this.floorToGo = 0;
           this.$emit("open", this.currentFloor);
         }, 3000);
       }, duration);
@@ -70,11 +102,38 @@ export default {
     height() {
       return 100 / process.env.VUE_APP_BTN_AMOUNT + "%";
     },
+    cellData() {
+      return { currentFloor: this.currentFloor, floorToGo: this.floorToGo };
+    },
+  },
+
+  watch: {
+    currentFloor() {
+      this.$emit("save", this.cellData);
+    },
+    floorToGo() {
+      this.$emit("save", this.cellData);
+    },
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  background: rgb(104, 104, 104);
+  position: absolute;
+  top: 10%;
+  left: 20%;
+  width: 60%;
+  height: 20%;
+  border-radius: 5px;
+  & div {
+    color: white;
+  }
+}
 .shaft {
   position: relative;
   height: 100%;

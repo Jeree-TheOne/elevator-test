@@ -3,7 +3,13 @@
     <FloorDivider :floors="btnAmount" />
     <div class="flex">
       <div class="h-screen">
-        <ElevatorCell @open="opened" ref="cell" />
+        <ElevatorCell
+          @open="opened"
+          @save="saveData"
+          ref="cell"
+          :startingFloor="cellInfo.currentFloor"
+          :finalFloor="cellInfo.floorToGo"
+        />
       </div>
       <div class="left-4 ml-4 h-screen flex flex-col-reverse justify-between">
         <ElevatorButton
@@ -32,27 +38,34 @@ export default {
   methods: {
     called(v) {
       if (this.queue.includes(v)) return;
+      if (this.cellInfo.currentFloor == v && this.cellInfo.floorToGo == 0)
+        return;
       this.queue.push(v);
       this.$refs.cell.isOpen && this.$refs.cell.moveToFloor(this.queue[0]);
 
       console.log(this.queue);
     },
-    opened(v) {
-      console.log(v);
+    opened() {
       this.queue = this.queue.slice(1);
       if (this.queue.length == 0) return;
       this.$refs.cell.moveToFloor(this.queue[0]);
+    },
+    saveData(data) {
+      localStorage.setItem("data", JSON.stringify(data));
+      this.cellInfo = data;
     },
   },
 
   mounted() {
     this.btnAmount = +process.env.VUE_APP_BTN_AMOUNT;
+    this.cellInfo = JSON.parse(localStorage.getItem("data"));
   },
 
   data() {
     return {
       btnAmount: 1,
       queue: [],
+      cellInfo: {},
     };
   },
 };
