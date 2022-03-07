@@ -1,24 +1,15 @@
-# elevator-test
-
-## Project setup
-```
+#Установка:
 npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+#Запуск программы:
+npm run start
 
-### Compiles and minifies for production
-```
-npm run build
-```
+#Конфигурация
+Настройка этажей и лифтов в файле .env
 
-### Lints and fixes files
-```
-npm run lint
-```
+#Версия
+Рабочая полностью базовая версия + дополнительные задания (обычная сложность) на коммите 04f4f1d77d82cd0ffde71ce0ac17f9dd1ebf65b5
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+#Что НЕ удалось
+Реализовать поочередное вызывание лифтов при наличии очереди запросов
+Реализовать сохранение состояния приложения при нескольких лифтах

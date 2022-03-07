@@ -55,6 +55,7 @@ export default {
       this.isOpen = false;
       let duration = Math.abs(floor - this.currentFloor) * 1000 + 1;
       let finalPossition = `translateY(${(floor - 1) * -100 + "%"})`;
+      this.$emit("picked");
       this.$refs.cell.animate(
         [
           { transform: this.$refs.cell.transform },
