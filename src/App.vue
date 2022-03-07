@@ -3,13 +3,14 @@
     <FloorDivider :floors="btnAmount" />
     <div class="flex">
       <div class="h-screen">
-        <ElevatorCell />
+        <ElevatorCell @open="opened" ref="cell" />
       </div>
       <div class="left-4 ml-4 h-screen flex flex-col-reverse justify-between">
         <ElevatorButton
           v-for="index in btnAmount"
           :key="index"
           :floor="index"
+          :active="queue.includes(index)"
           @called="called"
         />
       </div>
@@ -30,7 +31,17 @@ export default {
 
   methods: {
     called(v) {
+      if (this.queue.includes(v)) return;
+      this.queue.push(v);
+      this.$refs.cell.isOpen && this.$refs.cell.moveToFloor(this.queue[0]);
+
+      console.log(this.queue);
+    },
+    opened(v) {
       console.log(v);
+      this.queue = this.queue.slice(1);
+      if (this.queue.length == 0) return;
+      this.$refs.cell.moveToFloor(this.queue[0]);
     },
   },
 
@@ -41,6 +52,7 @@ export default {
   data() {
     return {
       btnAmount: 1,
+      queue: [],
     };
   },
 };

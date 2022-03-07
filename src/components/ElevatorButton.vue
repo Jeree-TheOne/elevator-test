@@ -16,6 +16,16 @@ export default {
       Type: Number,
       required: true,
     },
+    active: {
+      type: Boolean,
+      required: true,
+    },
+  },
+
+  computed: {
+    color() {
+      return this.active ? "rgb(255, 166, 0)" : "rgb(131, 104, 226)";
+    },
   },
 };
 </script>
@@ -27,6 +37,7 @@ export default {
   position: absolute;
 }
 button {
+  $color: v-bind(color);
   width: 30px;
   height: 30px;
   display: flex;
@@ -35,9 +46,9 @@ button {
   & div {
     width: 5px;
     height: 5px;
-    background-color: rgb(131, 104, 226);
+    background-color: $color;
     border-radius: 1000px;
-    box-shadow: 0 0 0 5px rgb(255, 255, 255), 0 0 0 10px rgb(131, 104, 226);
+    box-shadow: 0 0 0 5px rgb(255, 255, 255), 0 0 0 10px $color;
   }
 }
 </style>
