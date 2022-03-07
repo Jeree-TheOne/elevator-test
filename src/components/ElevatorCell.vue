@@ -40,6 +40,7 @@ export default {
       this.$refs.cell.style.transform = `translateY(${
         (this.currentFloor - 1) * -100 + "%"
       })`;
+      if (this.currentFloor == this.floorToGo) this.floorToGo = 0;
       if (this.floorToGo > 0) this.moveToFloor(this.floorToGo);
     });
   },

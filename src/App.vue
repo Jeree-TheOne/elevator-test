@@ -52,6 +52,7 @@ export default {
     },
     saveData(data) {
       localStorage.setItem("data", JSON.stringify(data));
+      localStorage.setItem("queue", JSON.stringify(this.queue));
       this.cellInfo = data;
     },
   },
@@ -59,6 +60,8 @@ export default {
   mounted() {
     this.btnAmount = +process.env.VUE_APP_BTN_AMOUNT;
     this.cellInfo = JSON.parse(localStorage.getItem("data"));
+    this.queue = JSON.parse(localStorage.getItem("queue"));
+    if (this.queue.length != 0) this.$refs.cell.moveToFloor(this.queue[0]);
   },
 
   data() {
