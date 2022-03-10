@@ -2,15 +2,14 @@
   <div>
     <FloorDivider :floors="btnAmount" />
     <div class="flex">
-      <div class="h-screen flex">
+      <div v-if="render" class="h-screen flex">
         <ElevatorCell
           v-for="index in elevatorAmount"
           :key="index"
           @open="opened"
           @save="saveData"
           ref="cells"
-          :startingFloor="cellInfo.currentFloor"
-          :finalFloor="cellInfo.floorToGo"
+          :cellInfo="cellInfo[index - 1]"
         />
       </div>
       <div class="left-4 ml-4 h-screen flex flex-col-reverse justify-between">
@@ -18,7 +17,7 @@
           v-for="index in btnAmount"
           :key="index"
           :floor="index"
-          :active="chosenFloors.includes(index)"
+          :active="chosenFloors.includes(index) || queue.includes(index)"
           @called="called"
         />
       </div>
@@ -41,38 +40,43 @@ export default {
   methods: {
     called(v) {
       if (this.queue.includes(v)) return;
-      if (this.cellInfo.currentFloor == v && this.cellInfo.floorToGo == 0)
-        return;
       this.queue.push(v);
-      this.callElevator();
     },
     opened() {
       this.saveData();
+      if (
+        this.queue.length != 0 &&
+        this.$refs.cells.some((cell) => cell.isOpen)
+      )
+        this.callElevator();
     },
     saveData() {
-      this.cellInfo = [];
-      this.$refs.cells.forEach((cell) => {
-        this.cellInfo.push({
-          currentFloor: cell.currentFloor,
-          floorToGo: cell.floorToGo,
+      nextTick(() => {
+        this.cellInfo = [];
+        this.$refs.cells.forEach((cell) => {
+          this.cellInfo.push({
+            currentFloor: cell.currentFloor,
+            floorToGo: cell.floorToGo,
+          });
         });
+        localStorage.setItem("data", JSON.stringify(this.cellInfo));
+        localStorage.setItem("queue", JSON.stringify(this.queue));
+        this.cellInfo = JSON.parse(localStorage.getItem("data"));
       });
-      localStorage.setItem("data", JSON.stringify(this.cellInfo));
-      localStorage.setItem("queue", JSON.stringify(this.queue));
     },
     callElevator() {
-      var closest = this.cellInfo.reduce((prev, curr) => {
-        if (curr.floorToGo != 0) return prev;
-        // в браузере undefinded curr.currentFloor, в консоль выводит ._.
-        Math.abs(curr.currentFloor - this.queue[0]) <
-        Math.abs(prev.currentFloor - this.queue[0])
-          ? curr
-          : prev;
+      let floor = this.queue[0];
+      var closest = this.$refs.cells.reduce((prev, curr) => {
+        if (!prev.isOpen) return curr;
+        if (!curr.isOpen) return prev;
+        if (
+          Math.abs(curr.currentFloor - floor) <
+          Math.abs(prev.currentFloor - floor)
+        )
+          return curr;
+        return prev;
       });
-
-      this.$refs.cells[this.cellInfo.indexOf(closest)].moveToFloor(
-        this.queue[0]
-      );
+      closest.moveToFloor(floor);
       this.queue = this.queue.slice(1);
     },
   },
@@ -81,9 +85,12 @@ export default {
     nextTick(() => {
       this.btnAmount = +process.env.VUE_APP_BTN_AMOUNT;
       this.elevatorAmount = +process.env.VUE_APP_ELEVATOR_AMOUNT;
-      this.cellInfo = JSON.parse(localStorage.getItem("data"));
+      if (localStorage.getItem("data")) {
+        this.cellInfo = JSON.parse(localStorage.getItem("data"));
+      }
+      this.render = true;
       this.queue = JSON.parse(localStorage.getItem("queue"));
-      while (this.queue.length != 0) this.callElevator();
+      this.saveData();
     });
   },
 
@@ -93,18 +100,23 @@ export default {
       elevatorAmount: 1,
       queue: [],
       cellInfo: [],
+      render: false,
     };
   },
   watch: {
-    queue: {
-      handler: function () {
-        this.saveData();
-      },
+    queueCopy() {
+      this.saveData();
+      if (this.queue.length != 0 && this.cellInfo.some((c) => c.floorToGo == 0))
+        this.callElevator();
     },
   },
+
   computed: {
     chosenFloors() {
       return this.cellInfo.map((cell) => cell.floorToGo);
+    },
+    queueCopy() {
+      return this.queue.slice();
     },
   },
 };

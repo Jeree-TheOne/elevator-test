@@ -16,27 +16,21 @@ export default {
     return {
       currentFloor: 1,
       isOpen: true,
-      floorToGo: 1,
+      floorToGo: 0,
       direction: true,
     };
   },
 
   props: {
-    startingFloor: {
-      type: Number,
-      default: 1,
-    },
-    finalFloor: {
-      type: Number,
-      default: 0,
+    cellInfo: {
+      type: Object,
     },
   },
 
   mounted() {
     nextTick(() => {
-      this.currentFloor = this.startingFloor;
-      this.floorToGo = this.finalFloor;
-
+      this.currentFloor = this.cellInfo.currentFloor;
+      this.floorToGo = this.cellInfo.floorToGo;
       this.$refs.cell.style.transform = `translateY(${
         (this.currentFloor - 1) * -100 + "%"
       })`;
@@ -54,13 +48,12 @@ export default {
       this.floorToGo = floor;
       this.isOpen = false;
       let duration = Math.abs(floor - this.currentFloor) * 1000 + 1;
-      let finalPossition = `translateY(${(floor - 1) * -100 + "%"})`;
-      this.$emit("picked");
+      let finalPosition = `translateY(${(floor - 1) * -100 + "%"})`;
       this.$refs.cell.animate(
         [
-          { transform: this.$refs.cell.transform },
+          { transform: this.$refs.cell.style.transform },
           {
-            transform: finalPossition,
+            transform: finalPosition,
           },
         ],
         {
@@ -73,7 +66,7 @@ export default {
       }, 1000);
       setTimeout(() => {
         clearInterval(s);
-        this.$refs.cell.style.transform = finalPossition;
+        this.$refs.cell.style.transform = finalPosition;
         this.$refs.cell.animate(
           [
             { opacity: "1" },
@@ -110,10 +103,7 @@ export default {
   },
 
   watch: {
-    currentFloor() {
-      this.$emit("save", this.cellData);
-    },
-    floorToGo() {
+    cellData() {
       this.$emit("save", this.cellData);
     },
   },
