@@ -39,7 +39,7 @@ export default {
 
   methods: {
     called(v) {
-      if (this.queue.includes(v)) return;
+      if (this.queue.includes(v) || this.chosenFloors.includes(v)) return;
       this.queue.push(v);
     },
     opened() {
