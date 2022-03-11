@@ -88,8 +88,11 @@ export default {
       if (localStorage.getItem("data")) {
         this.cellInfo = JSON.parse(localStorage.getItem("data"));
       }
+      if (localStorage.getItem("queue")) {
+        this.queue = JSON.parse(localStorage.getItem("queue"));
+      }
       this.render = true;
-      this.queue = JSON.parse(localStorage.getItem("queue"));
+
       this.saveData();
     });
   },
